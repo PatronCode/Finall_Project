@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Historical Dashboard - Bitcoin Price Predictor</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: linear-gradient(135deg, #172a74, #21a9af);
+            min-height: 100vh;
+            color: white;
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        .dashboard-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .user-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .price-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+        }
+        .price-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ffd700;
+            margin: 15px 0;
+        }
+        .last-update {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px;
+        }
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            color: white;
+            box-shadow: none;
+        }
+        .btn-primary {
+            background: #21a9af;
+            border: none;
+            padding: 12px 25px;
+        }
+        .btn-primary:hover {
+            background: #1c8f94;
+        }
+        .btn-outline-danger {
+            border-color: rgba(255, 255, 255, 0.5);
+            color: white;
+        }
+        .btn-outline-danger:hover {
+            background: rgba(220, 53, 69, 0.2);
+            border-color: rgba(220, 53, 69, 0.5);
+        }
+        .result {
+            margin-top: 25px;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .success {
+            background: rgba(40, 167, 69, 0.2);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+        }
+        .error {
+            background: rgba(220, 53, 69, 0.2);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+        }
+        .note {
+            margin-top: 20px;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9em;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+        }
+        .prediction-section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dashboard-container">
+            <div class="user-header">
+                <h2>Historical Predictions</h2>
+                <div class="nav-buttons">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-primary">Future Dashboard</a>
+                    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger">Logout</a>
+                </div>
+            </div>
+
+            <div class="price-card">
+                <h4>Current Bitcoin Price</h4>
+                <div class="price-value">${{ "{:,.2f}".format(current_price) }}</div>
+                <p class="last-update mb-0">Last updated: {{ last_update }}</p>
+            </div>
+
+            <div class="prediction-section">
+                <h3 class="text-center mb-4">Predict Historical Bitcoin Price</h3>
+                
+                <form method="POST">
+                    <div class="mb-4">
+                        <label for="date" class="form-label">Select Historical Date:</label>
+                        <input type="date" class="form-control" id="date" name="date" required 
+                               min="{{ earliest_date }}" max="{{ last_known_date }}">
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Generate Historical Prediction</button>
+                </form>
+
+                {% if error %}
+                <div class="result error">
+                    {{ error }}
+                </div>
+                {% elif prediction is not none %}
+                <div class="result success">
+                    <h4>Prediction Result for {{ input_date }}:</h4>
+                    <p>Predicted Price: <span style="color: #ffd700">${{ "{:,.2f}".format(prediction) }}</span></p>
+                    {% if actual_price is not none %}
+                    <p>Actual Price: <span style="color: #ffd700">${{ "{:,.2f}".format(actual_price) }}</span></p>
+                    <!-- {% if accuracy is not none %}
+                    <p>Prediction Accuracy: {{ "{:.2f}%".format(accuracy) }}</p>
+                    {% endif %}
+                    {% endif %} -->
+                </div>
+                {% endif %}
+
+                <div class="note">
+                    <p class="mb-1">📅 Available date range: {{ earliest_date }} to {{ last_known_date }}</p>
+                    <p class="mb-0">Select a date within the available range to see how the model would have performed</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        setInterval(function() {
+            location.reload();
+        }, 30000);
+    </script>
+</body>
+</html>
